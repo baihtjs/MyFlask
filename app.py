@@ -1,6 +1,6 @@
 import uuid
 
-from flask import Flask, render_template, request, make_response, Response, redirect, url_for, abort
+from flask import Flask, render_template, request, make_response, Response, redirect, url_for, abort, json
 from flask_script import Manager
 
 app = Flask(__name__)
@@ -86,10 +86,22 @@ def redir():
 
    # return redirect(url_for('hello'))
 
-@app.route('/abort')
+@app.route('/abort/')
 def ab():
     print(request.remote_addr)
     abort(302)
+
+@app.route('/json/')
+def myjson():
+   # print(name)
+   # result = json.jsonify({'name':'value'})
+    #result =json.jsonify(name='chalie', age=18)
+    #result = json.dumps({'name':'chalie','age':18})
+    result='{"name":"Tom","age":20 }'
+    response=Response(response=result,content_type='application/json')
+    print(result)
+    print(type(result))
+    return response
 
 
 if __name__ == '__main__':
