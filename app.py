@@ -1,6 +1,6 @@
 import uuid
 
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, make_response, Response, redirect, url_for, abort
 from flask_script import Manager
 
 app = Flask(__name__)
@@ -16,7 +16,11 @@ def hello_world():
     return 'Hello World!'
 @app.route('/hello')
 def hello():
-    return render_template('hello.html')
+    print(request.remote_addr)
+    if request.remote_addr=='192.168.1.4':
+        return redirect(url_for('ab'))
+    else:
+        return render_template('hello.html')
 
 @app.route('/register')
 def register():
@@ -64,12 +68,30 @@ def req():
 
 @app.route('/response/')
 def rep():
-    result = render_template('hello.html')
-    print(result)
-    print(type(result))
-    return '<h3>请求</h3>',401
+    #result = render_template('hello.html')
+    #print(result)
+    #print(type(result))
+    #response=make_response('<h2>我是H2的response！</h2>')
+    # response=make_response(render_template('hello.html'))
+    response=Response(response='<h2>我是自己构造的response！</h2>', status=403)
+    print(type(response))
+    return response
+
+@app.route('/redirect/')
+def redir():
+   response=redirect(url_for('hello'))
+   print(response)
+   print(type(response))
+   return response
+
+   # return redirect(url_for('hello'))
+
+@app.route('/abort')
+def ab():
+    print(request.remote_addr)
+    abort(404)
 
 
 if __name__ == '__main__':
-   app.run(debug=True, port=8000, host='127.0.0.1')
+   app.run(debug=True, port=8000, host='0.0.0.0')
 
