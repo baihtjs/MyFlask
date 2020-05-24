@@ -89,7 +89,7 @@ def redir():
 @app.route('/abort')
 def ab():
     print(request.remote_addr)
-    abort(404)
+    abort(302)
 
 
 if __name__ == '__main__':
