@@ -2,8 +2,8 @@ import uuid
 
 from flask import Flask, render_template, request, make_response, Response, redirect, url_for, abort, json
 from flask_script import Manager
-
 app = Flask(__name__)
+#app = Flask(__name__,static_url_path='',root_path='/static')
 #manager = Manager(app=app)
 
 
@@ -32,10 +32,34 @@ def params(hehe):
 
     return 'huoqucanshu'
 
+@app.route('/register/',methods=['GET','POST'])
+def reg():
+    return render_template('register.html')
+    req_log_name=request.form.get('username')
+    print(req_log_name)
+
+@app.route('/login/',methods=['GET','POST'])
+def login():
+    req_log_name = request.form.get('username')
+    req_log_pass = request.form.get('password')
+    if req_log_name=='admin' and req_log_pass=='admin':
+        return '登陆成功!'
+    else:
+        return '登陆失败！'
+    print(req_log_name)
+    print(req_log_pass)
+    #return render_template('login.html')
+
+
+@app.route('/home')
+def home():
+    return render_template('login.html')
+
 @app.route('/get/<string:name>',methods=['GET','POST'])
 def get(name):
-    return 'get/name'
-    return name
+    #return name
+    return '<h1>Hello %s!</h1>' % name
+
 @app.route('/getint/<int:name>')
 def getint(name):
     return 'get/name'
