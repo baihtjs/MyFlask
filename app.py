@@ -18,9 +18,14 @@ def hello_world():
     return 'Hello World!'
 @app.route('/hello')
 def hello():
+    name = request.cookies.get('name')
     print(request.remote_addr)
     if request.remote_addr=='192.168.1.4':
         return redirect(url_for('ab'))
+    elif name=='admin':
+        return '<h1>%s您好！'%name
+    elif name=='root':
+        return '<h1>%s您好！'%name
     else:
         return render_template('hello.html')
 
@@ -50,11 +55,23 @@ def login():
         response.set_cookie('name', req_log_name)
         print(type(response))
         return response
+    elif req_log_name=='root' and req_log_pass=='root':
+        session['logged_in'] = True
+        response = Response(response='<h2>%s登陆成功！</h2>' %req_log_name, status=200)
+        response.set_cookie('name', req_log_name)
+        print(type(response))
+        return response
     else:
         return '登陆失败！'
     print(req_log_name)
     print(req_log_pass)
     #return render_template('login.html')
+
+@app.route('/logout')
+def logout():
+    if 'logged_in' in session:
+        session.pop('logged_in')
+    return redirect(url_for('hello_world'))
 
 
 @app.route('/home')
@@ -95,7 +112,7 @@ def req():
     #print(request.remote_addr)
     #print(request.url)
     #print(request.user_agent)
-    return '请求%s' %name
+    return '请求！%s已登录' %name
 
 @app.route('/response/')
 def rep():
@@ -168,6 +185,29 @@ def config():
     ssh.close()
 
     return '<p>源ip为%s</p>' %req_souceip
+@app.route('/admin/')
+def admin():
+    if 'logged_in' not in session:
+        return render_template('login.html')
+    else:
+        response = redirect(url_for('req'))
+        return response
+
+@app.route('/foo')
+def foo():
+    return '<h1>Foo page</h1><a href="%s">Do something</a>' % url_for('do_something')
+
+@app.route('/bar')
+def bar():
+    return '<h1>Bar page</h1><a href="%s">Do something</a>' % url_for('do_something')
+
+@app.route('/do_something')
+def do_something():
+    #return redirect(url_for('hello'))
+    return redirect(request.referrer or url_for('hello'))
+
+
+
 
 
 
