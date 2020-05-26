@@ -1,8 +1,10 @@
 import uuid
 
-from flask import Flask, render_template, request, make_response, Response, redirect, url_for, abort, json
+import paramiko
+from flask import Flask, render_template, request, make_response, Response, redirect, url_for, abort, json, session
 from flask_script import Manager
 app = Flask(__name__)
+app.config['SECRET_KEY'] = '\xca\x0c\x86\x04\x98@\x02b\x1b7\x8c\x88]\x1b\xd7"+\xe6px@\xc3#\\'
 #app = Flask(__name__,static_url_path='',root_path='/static')
 #manager = Manager(app=app)
 
@@ -43,7 +45,11 @@ def login():
     req_log_name = request.form.get('username')
     req_log_pass = request.form.get('password')
     if req_log_name=='admin' and req_log_pass=='admin':
-        return '登陆成功!'
+        session['logged_in'] = True
+        response = Response(response='<h2>%s登陆成功！</h2>' %req_log_name, status=200)
+        response.set_cookie('name', req_log_name)
+        print(type(response))
+        return response
     else:
         return '登陆失败！'
     print(req_log_name)
@@ -82,13 +88,14 @@ def req():
     print(request.args.get('name'))
     print(request.args.get('password'))
     print(request.args.getlist('password'))
+    name=request.cookies.get('name')
     #print(request.form)
     #print(request.files)
     #print(request.cookies)
     #print(request.remote_addr)
     #print(request.url)
     #print(request.user_agent)
-    return '请求'
+    return '请求%s' %name
 
 @app.route('/response/')
 def rep():
@@ -98,6 +105,7 @@ def rep():
     #response=make_response('<h2>我是H2的response！</h2>')
     # response=make_response(render_template('hello.html'))
     response=Response(response='<h2>我是自己构造的response！</h2>', status=403)
+    response.set_cookie('name','Jack')
     print(type(response))
     return response
 
@@ -115,6 +123,10 @@ def ab():
     print(request.remote_addr)
     abort(302)
 
+@app.route('/baidu/')
+def baidu():
+    return '',302,{'location':'https://www.baidu.com'}
+
 @app.route('/json/')
 def myjson():
    # print(name)
@@ -126,6 +138,37 @@ def myjson():
     print(result)
     print(type(result))
     return response
+@app.route('/script/')
+def script():
+    return render_template('script.html')
+
+@app.route('/config/',methods=['POST'])
+def config():
+    req_souceip = request.form.get('sourceip')
+    req_destip = request.form.get('destip')
+    req_destport = request.form.get('destport')
+    ssh = paramiko.SSHClient()
+    know_host = paramiko.AutoAddPolicy()
+    # 加载创建的白名单
+    ssh.set_missing_host_key_policy(know_host)
+
+    # 连接服务器
+    ssh.connect(
+        hostname="172.16.0.18",
+        port=22,
+        username="moniter",
+        password="2*2=5No"
+    )
+    print('username')
+
+    # 执行命令
+    stdin, stdout, stderr = ssh.exec_command("route")
+
+    print(stdout.read().decode())
+    ssh.close()
+
+    return '<p>源ip为%s</p>' %req_souceip
+
 
 
 if __name__ == '__main__':
