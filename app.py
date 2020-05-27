@@ -199,7 +199,7 @@ def foo():
 
 @app.route('/bar')
 def bar():
-    return '<h1>Bar page</h1><a href="%s">Do something</a>' % url_for('do_something')
+    return '<h1>Ba page</h1><a href="%s">Do something</a>' % url_for('do_something')
 
 @app.route('/do_something')
 def do_something():
