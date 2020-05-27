@@ -29,6 +29,7 @@ def hello():
     else:
         return render_template('hello.html')
 
+
 @app.route('/register')
 def register():
     return render_template('register.html')
