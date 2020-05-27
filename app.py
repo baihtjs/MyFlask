@@ -200,17 +200,12 @@ def foo():
 
 @app.route('/bar')
 def bar():
-    return '<h1>Bar page</h1><a href="%s">Do something</a>' % url_for('do_something')
+    return '<h1>Bar pag</h1><a href="%s">Do something</a>' % url_for('do_something')
 
 @app.route('/do_something')
 def do_something():
     #return redirect(url_for('hello'))
     return redirect(request.referrer or url_for('hello'))
-
-
-
-
-
 
 if __name__ == '__main__':
    app.run(debug=True, port=8000, host='0.0.0.0')
