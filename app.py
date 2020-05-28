@@ -3,6 +3,9 @@ import uuid
 import paramiko
 from flask import Flask, render_template, request, make_response, Response, redirect, url_for, abort, json, session
 from flask_script import Manager
+from jinja2.utils import generate_lorem_ipsum
+from jinja2 import escape
+
 app = Flask(__name__)
 app.config['SECRET_KEY'] = '\xca\x0c\x86\x04\x98@\x02b\x1b7\x8c\x88]\x1b\xd7"+\xe6px@\xc3#\\'
 #app = Flask(__name__,static_url_path='',root_path='/static')
@@ -206,7 +209,52 @@ def do_something():
     #return redirect(url_for('hello'))
     return redirect(request.referrer or url_for('hello'))
 
+@app.route('/post')
+def show_post():
+    post_body = generate_lorem_ipsum(n=2)
+    return '''
+    <h1>A very long post</h1>
+    <div class="body">%s</div>
+    <button id="load1">Load More</button>
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script type="text/javascript">
+    $(function() {
+        $('#load1').click(function() {
+            $.ajax({
+                url: '/more',
+                type: 'get',
+                success: function(data){
+                    $('.body').append(data);
+                }
+            })
+        })
+    })
+    </script>''' % post_body
+@app.route('/more')
+def load_post():
+    return generate_lorem_ipsum(n=1)
+@app.route('/xss')
+def xss():
+    name = request.args.get('name')
+    #response='<h1>Hello,%s!</h1>' % name
+    response='<h1>Hello,%s!</h1>' % escape(name)
+    return response
+#http://127.0.0.1:5000/xss?name=<script>window.location.href="https://www.baidu.com";</script>
+#http://127.0.0.1:5000/xss?name=<script>alert("Bingo!");</script>
 
+@app.route('/watchlist')
+def watchlist():
+    user1 = {
+            'username' : 'Charlie',
+            'bio' : 'A boy who loves movies and music.',
+    }
+    movies1 = [
+        {'name': 'My neighbor Totoro', 'year': '1988'},
+        {'name': 'Three Color', 'year': '1998'},
+        {'name': 'Froest GUMPS', 'year': '2098'},
+        {'name': 'Black Swans', 'year': '1978'},
+    ]
+    return  render_template('watchlist.html', user2=user1, movies2=movies1)
 
 
 
