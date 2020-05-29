@@ -11,14 +11,26 @@ app.config['SECRET_KEY'] = '\xca\x0c\x86\x04\x98@\x02b\x1b7\x8c\x88]\x1b\xd7"+\x
 #app = Flask(__name__,static_url_path='',root_path='/static')
 #manager = Manager(app=app)
 
+@app.context_processor
+def inject_foo():
+    foo='I am a foo.'
+    return dict(foo=foo) #全局变量可传入模版
+@app.template_global()
+def bar():
+    return 'I am a Bar.'
 
 @app.route('/')
+def index():
+    return render_template('index.html')
+
+'''
 def hello_world():
     a=10
     b=1
     c=a/b
     #return c
     return 'Hello World!'
+'''
 @app.route('/hello')
 def hello():
     name = request.cookies.get('name')
@@ -255,6 +267,7 @@ def watchlist():
         {'name': 'Black Swans', 'year': '1978'},
     ]
     return  render_template('watchlist.html', user2=user1, movies2=movies1)
+
 
 
 
