@@ -1,13 +1,29 @@
 <!DOCTYPE html>
 <html lang="en">
 {% from '_macro.html' import qux %}
-<head>
-    <meta charset="UTF-8">
-    <title>Index</title>
-</head>
+{% extends 'base.html' %}
 <body>
-<h1>我是主页</h1>
+{% block content %}
+<h1>我是index子模版主页内容</h1>
 <h2>{{ qux(amount=5) }}</h2>
-{%  include 'banner.html' %}
+{% set name='baz1' %}
+<h1>下面是子模版--继承于基模版base.html</h1>
+    <ul>
+        <li><a href="{{ url_for('watchlist') }}">Watchlist</a> </li>
+        <li>Filter:{{ foo|musical }}</li>
+        <li>Global:{{ bar() }}</li>
+        <li>Test:{% if name is baz %}I am baz{% endif %}</li>
+        <li>Macro:{{ qux(amount=5) }}</li>
+        <li><p>Filter:{{ 'HELLO' | lower }}</p></li>
+        <li><p>Filter:{{ 'hello' | upper }}</p></li>
+        <li><p>Filter:{{ [1,2,3,4,5,6] | first }}</p></li>
+    </ul>
+{% endblock %}
 </body>
+{% block footer %}
+    <h1><p>—————————————————————————————————————</p></h1>
+    <h1><p>这是我自定义的footer-覆盖了基模版的footer！</p></h1>
+    <h1><p>—————————————————————————————————————</p></h1>
+    {{ super() }}
+{% endblock %}
 </html>

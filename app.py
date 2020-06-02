@@ -5,6 +5,7 @@ from flask import Flask, render_template, request, make_response, Response, redi
 from flask_script import Manager
 from jinja2.utils import generate_lorem_ipsum
 from jinja2 import escape
+from flask import Markup
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = '\xca\x0c\x86\x04\x98@\x02b\x1b7\x8c\x88]\x1b\xd7"+\xe6px@\xc3#\\'
@@ -270,8 +271,18 @@ def watchlist():
 
 @app.route('/banner')
 def banner():
-    return render_template('banner.html')
+    return render_template('_banner.html')
 
+@app.template_filter()
+def musical(s):
+    return s + Markup(' &#9835;')
+
+@app.template_test()
+def baz(n):
+    if n == 'baz1':
+        return True
+    else:
+        return False
 
 
 if __name__ == '__main__':
