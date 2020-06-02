@@ -270,7 +270,7 @@ def watchlist():
 
 @app.route('/banner')
 def banner():
-    return render_template('_banner.html')
+    return render_template('banner.html')
 
 
 
