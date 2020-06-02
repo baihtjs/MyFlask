@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Macro</title>
+</head>
+<body>
+{% macro qux(amount=1) %}
+    {% if amount ==1 %}
+        I am qux-I am Macro!!
+    {% elif amount >1 %}
+        We are quxs-I am Macro!.
+    {% endif %}
+{% endmacro %}
+</body>
+</html>

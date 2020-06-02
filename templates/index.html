@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html lang="en">
+{% from '_macro.html' import qux %}
+<head>
+    <meta charset="UTF-8">
+    <title>Index</title>
+</head>
+<body>
+<h1>我是主页</h1>
+<h2>{{ qux(amount=5) }}</h2>
+{%  include '_banner.html' %}
+</body>
+</html>

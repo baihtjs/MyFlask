@@ -268,7 +268,9 @@ def watchlist():
     ]
     return  render_template('watchlist.html', user2=user1, movies2=movies1)
 
-
+@app.route('/banner')
+def banner():
+    return render_template('_banner.html')
 
 
 
