@@ -1,12 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
+<link rel="icon" type="image/x-icon" href="{{ url_for('static',filename='favicon.ico') }}">
 <head>
     <meta charset="UTF-8">
     <title>{{ user2.username }}'s Watchlist</title>
 </head>
+
 <body>
 <a href="{{ url_for('hello') }}">&larr; Return</a>
-<h2>{{ user2.username }}</h2>
+<h2>{{ user2.username }}<img src="{{ url_for('static',filename='avatar.jpg') }}" width="50"></h2>
+
 {% if user2.bio %}
     <i>{{ user2.bio }}</i>
 {% else %}

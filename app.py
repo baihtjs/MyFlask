@@ -1,7 +1,8 @@
 import uuid
 
 import paramiko
-from flask import Flask, render_template, request, make_response, Response, redirect, url_for, abort, json, session
+from flask import Flask, render_template, request, make_response, Response, redirect, url_for, abort, json, session, \
+    flash
 from flask_script import Manager
 from jinja2.utils import generate_lorem_ipsum
 from jinja2 import escape
@@ -283,7 +284,17 @@ def baz(n):
         return True
     else:
         return False
+@app.route('/flash')
+def just_flash():
+    flash('I am flash,who is looking for me?')
+    return redirect(url_for('index'))
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template('errors/404.html'),404
 
+@app.errorhandler(500)
+def server_internal_err(e):
+    return "500错误"
 
 if __name__ == '__main__':
    app.run(debug=True, port=8000, host='0.0.0.0')

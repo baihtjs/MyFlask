@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+<link rel="icon" type="image/x-icon" href="/static/favicon.ico">
 {% from '_macro.html' import qux %}
 {% extends 'base.html' %}
 <body>
@@ -17,8 +18,10 @@
         <li><p>Filter:{{ 'HELLO' | lower }}</p></li>
         <li><p>Filter:{{ 'hello' | upper }}</p></li>
         <li><p>Filter:{{ [1,2,3,4,5,6] | first }}</p></li>
+        <li><a href="{{ url_for('just_flash') }}">Flash_someting</a></li>
     </ul>
 {% endblock %}
+
 </body>
 {% block footer %}
     <h1><p>—————————————————————————————————————</p></h1>
