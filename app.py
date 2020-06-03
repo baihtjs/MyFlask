@@ -295,6 +295,9 @@ def page_not_found(e):
 @app.errorhandler(500)
 def server_internal_err(e):
     return "500错误"
+@app.route('/my_login')
+def my_login():
+    return render_template('my_login.html'),200
 
 if __name__ == '__main__':
    app.run(debug=True, port=8000, host='0.0.0.0')
