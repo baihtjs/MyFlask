@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>LoginForm-test</title>
+</head>
+<body>
+<form method="post">
+    {{ form.csrf_token }}
+    {{ form.username.label }}{{ form.username }}<br>
+    {{ form.password.label }}{{ form.password }}<br>
+    {{ form.remember }}{{ form.remember.label }}<br>
+    {{ form.submit }}
+</form>
+</body>
+</html>

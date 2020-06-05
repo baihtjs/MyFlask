@@ -8,6 +8,8 @@ from jinja2.utils import generate_lorem_ipsum
 from jinja2 import escape
 from flask import Markup
 
+from forms import LoginForm
+
 app = Flask(__name__)
 app.config['SECRET_KEY'] = '\xca\x0c\x86\x04\x98@\x02b\x1b7\x8c\x88]\x1b\xd7"+\xe6px@\xc3#\\'
 #app = Flask(__name__,static_url_path='',root_path='/static')
@@ -298,6 +300,22 @@ def server_internal_err(e):
 @app.route('/my_login')
 def my_login():
     return render_template('my_login.html'),200
+
+@app.route('/basic',methods=['GET', 'POST'])
+def basic():
+    form1=LoginForm()
+    print(request.form.get('username'))
+    if form1.validate_on_submit():
+        username = form1.username.data
+        flash('Welcome home,%s!'% username)
+        return redirect(url_for('index'))
+    return render_template('basic.html',form=form1)
+
+@app.route('/bootstrap')
+def bootstrap():
+    form=LoginForm()
+    return render_template('bootstrap.html',form=form)
+
 
 if __name__ == '__main__':
    app.run(debug=True, port=8000, host='0.0.0.0')
