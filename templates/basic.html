@@ -8,9 +8,22 @@
 <form method="post">
     {{ form.csrf_token }}
     {{ form.username.label }}{{ form.username }}<br>
+    {% for message in form.username.errors %}
+        <small class="errot">{{ message }}</small><br>
+    {% endfor %}
     {{ form.password.label }}{{ form.password }}<br>
+    {% for message in form.password.errors %}
+        <small class="errot">{{ message }}</small><br>
+    {% endfor %}
     {{ form.remember }}{{ form.remember.label }}<br>
-    {{ form.submit }}
+    {{ form.submit }}<br>
+    <p>以下为测试表单字段</p>
+    {{ form.date.label }}{{ form.date }}<br>
+    {{ form.datetime.label }}{{ form.datetime }}<br>
+    {{ form.email.label }}{{ form.email }}<br>
+    {% for message in form.email.errors %}
+        <small class="errot">{{ message }}</small><br>
+    {% endfor %}
 </form>
 </body>
 </html>

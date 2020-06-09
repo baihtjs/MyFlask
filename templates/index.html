@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<input lang="en">
 <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
 {% from '_macro.html' import qux %}
 {% extends 'base.html' %}
@@ -23,10 +23,12 @@
 {% endblock %}
 
 </body>
+
 {% block footer %}
     <h1><p>—————————————————————————————————————</p></h1>
     <h1><p>这是我自定义的footer-覆盖了基模版的footer！</p></h1>
     <h1><p>—————————————————————————————————————</p></h1>
+    <input type="file"><br>
     {{ super() }}
 {% endblock %}
 </html>
