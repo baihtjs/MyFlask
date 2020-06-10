@@ -1,6 +1,7 @@
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileRequired, FileAllowed
-from wtforms import StringField, PasswordField, BooleanField, SubmitField, DateField, DateTimeField, FileField
+from wtforms import StringField, PasswordField, BooleanField, SubmitField, DateField, DateTimeField, FileField, \
+    MultipleFileField
 from wtforms.validators import DataRequired, Length, Email
 
 
@@ -15,6 +16,11 @@ class LoginForm(FlaskForm):
     email = StringField('Email', validators=[DataRequired(), Email(message='error email format ')])
 
 class UploadForm(FlaskForm):
-    photo = FileField('Upload Image', validators=[FileRequired(),FileAllowed['jpg', 'png'], 'Images only!'])
+    #photo = FileField('Upload Image')
+    photo = FileField('Upload Image', validators=[FileRequired('no files'), FileAllowed(['jpg','png'], 'Images only!')])
+    submit = SubmitField()
+
+class MultiUploadForm(FlaskForm):
+    photo = MultipleFileField('Upload Multi Image', validators=[DataRequired()])
     submit = SubmitField()
 

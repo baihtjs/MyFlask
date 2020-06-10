@@ -1,17 +1,20 @@
+import os
 import uuid
 
 import paramiko
 from flask import Flask, render_template, request, make_response, Response, redirect, url_for, abort, json, session, \
-    flash
+    flash, send_from_directory
 from flask_script import Manager
 from jinja2.utils import generate_lorem_ipsum
 from jinja2 import escape
 from flask import Markup
 
-from forms import LoginForm
+from forms import LoginForm, UploadForm, MultiUploadForm
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = '\xca\x0c\x86\x04\x98@\x02b\x1b7\x8c\x88]\x1b\xd7"+\xe6px@\xc3#\\'
+app.config['MAX_CONTENT_LENGTH']=2*1024*1024
+app.config['UPLOAD_PATH'] = os.path.join(app.root_path, 'uploads')
 #app = Flask(__name__,static_url_path='',root_path='/static')
 #manager = Manager(app=app)
 
@@ -315,6 +318,48 @@ def basic():
 def bootstrap():
     form=LoginForm()
     return render_template('bootstrap.html',form=form)
+@app.route('/upload',methods=['GET','POST'])
+def upload():
+    form = UploadForm()
+    if form.validate_on_submit():
+        f=form.photo.data
+        filename=random_filename(f.filename)
+        f.save(os.path.join(app.config['UPLOAD_PATH'], filename))
+        flash('Upload Success!')
+        session['filenames'] = [filename]
+        print(session['filename'])
+        return redirect(url_for('show_images'))
+    return render_template('upload.html', form=form)
+
+def random_filename(filename):
+    ext = os.path.splitext(filename)[1]
+    new_filename=uuid.uuid4().hex + ext
+    return new_filename
+
+@app.route('/uploaded-images')
+def show_images():
+    return render_template('uploaded.html')
+
+@app.route('/uploads/<path:filename>')
+def get_file(filename):
+    return send_from_directory(app.config['UPLOAD_PATH'], filename)
+
+@app.route('/multi-upload',methods=['GET','POST'])
+def multi_upload():
+    form = MultiUploadForm()
+    if request.method=='POST':
+        filenames = []
+        if 'photo' not in request.files:
+            flash('This field is required!')
+        for f in request.files.getlist('photo'):
+            filename = random_filename(f.filename)
+            f.save(os.path.join(app.config['UPLOAD_PATH'], filename))
+            filenames.append(filename)
+        flash('Upload Multi Success!')
+        session['filenames'] = [filenames]
+        return redirect(url_for('show_images'))
+    return render_template('upload.html',form=form)
+
 
 
 if __name__ == '__main__':

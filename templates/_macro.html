@@ -12,5 +12,15 @@
         We are quxs-I am Macro!.
     {% endif %}
 {% endmacro %}
+
+{% macro form_field(field) %}
+    {{ field.label }}<br>
+    {{ field(**kwargs) }}<br>
+    {% if field.errors %}
+        {% for error in field.errors %}
+            <small class="error">{{ error }}</small>
+        {% endfor %}
+    {% endif %}
+{% endmacro %}
 </body>
 </html>
