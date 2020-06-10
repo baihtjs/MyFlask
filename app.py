@@ -5,9 +5,11 @@ import paramiko
 from flask import Flask, render_template, request, make_response, Response, redirect, url_for, abort, json, session, \
     flash, send_from_directory
 from flask_script import Manager
+from flask_wtf.csrf import validate_csrf
 from jinja2.utils import generate_lorem_ipsum
 from jinja2 import escape
 from flask import Markup
+from wtforms import ValidationError
 
 from forms import LoginForm, UploadForm, MultiUploadForm
 
@@ -15,6 +17,7 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = '\xca\x0c\x86\x04\x98@\x02b\x1b7\x8c\x88]\x1b\xd7"+\xe6px@\xc3#\\'
 app.config['MAX_CONTENT_LENGTH']=2*1024*1024
 app.config['UPLOAD_PATH'] = os.path.join(app.root_path, 'uploads')
+app.config['ALLOWED_EXTENSIONS'] = ['png', 'jpg', 'jpeg', 'gif']
 #app = Flask(__name__,static_url_path='',root_path='/static')
 #manager = Manager(app=app)
 
@@ -344,22 +347,52 @@ def show_images():
 def get_file(filename):
     return send_from_directory(app.config['UPLOAD_PATH'], filename)
 
+
+
+def allowed_file(filename):
+    return '.' in filename and \
+            filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
+
+
 @app.route('/multi-upload',methods=['GET','POST'])
 def multi_upload():
     form = MultiUploadForm()
-    if request.method=='POST':
-        filenames = []
-        if 'photo' not in request.files:
-            flash('This field is required!')
-        for f in request.files.getlist('photo'):
-            filename = random_filename(f.filename)
-            f.save(os.path.join(app.config['UPLOAD_PATH'], filename))
-            filenames.append(filename)
-        flash('Upload Multi Success!')
-        session['filenames'] = [filenames]
-        return redirect(url_for('show_images'))
-    return render_template('upload.html',form=form)
 
+    if request.method == 'POST':
+        filenames = []
+
+        # check csrf token
+        try:
+            validate_csrf(form.csrf_token.data)
+        except ValidationError:
+            flash('CSRF token error.')
+            return redirect(url_for('multi_upload'))
+
+        # check if the post request has the file part
+        if 'photo' not in request.files:
+            flash('This field is required.')
+            return redirect(url_for('multi_upload'))
+
+        for f in request.files.getlist('photo'):
+            # if user does not select file, browser also
+            # submit a empty part without filename
+            # if f.filename == '':
+            #     flash('No selected file.')
+            #    return redirect(url_for('multi_upload'))
+            # check the file extension
+            if f and allowed_file(f.filename):
+                filename = random_filename(f.filename)
+                f.save(os.path.join(
+                    app.config['UPLOAD_PATH'], filename
+                ))
+                filenames.append(filename)
+            else:
+                flash('Invalid file type.')
+                return redirect(url_for('multi_upload'))
+        flash('Upload success.')
+        session['filenames'] = filenames
+        return redirect(url_for('show_images'))
+    return render_template('upload.html', form=form)
 
 
 if __name__ == '__main__':
