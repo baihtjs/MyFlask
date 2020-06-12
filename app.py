@@ -19,6 +19,8 @@ app.config['SECRET_KEY'] = '\xca\x0c\x86\x04\x98@\x02b\x1b7\x8c\x88]\x1b\xd7"+\x
 app.config['MAX_CONTENT_LENGTH']=2*1024*1024
 app.config['UPLOAD_PATH'] = os.path.join(app.root_path, 'uploads')
 app.config['ALLOWED_EXTENSIONS'] = ['png', 'jpg', 'jpeg', 'gif']
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL','sqlite:////' + os.path.join(app.root_path, 'data.db'))
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 #app = Flask(__name__,static_url_path='',root_path='/static')
 #manager = Manager(app=app)
@@ -468,6 +470,7 @@ def handle_register():
 class Note(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     body = db.Column(db.Text)
+
 
 
 
