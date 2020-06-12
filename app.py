@@ -10,14 +10,16 @@ from jinja2.utils import generate_lorem_ipsum
 from jinja2 import escape
 from flask import Markup
 from wtforms import ValidationError
+from flask_sqlalchemy import SQLAlchemy
 
-from forms import LoginForm, UploadForm, MultiUploadForm
+from forms import LoginForm, UploadForm, MultiUploadForm, RichTextForm, NewPostForm, SigninForm, RegisterForm
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = '\xca\x0c\x86\x04\x98@\x02b\x1b7\x8c\x88]\x1b\xd7"+\xe6px@\xc3#\\'
 app.config['MAX_CONTENT_LENGTH']=2*1024*1024
 app.config['UPLOAD_PATH'] = os.path.join(app.root_path, 'uploads')
 app.config['ALLOWED_EXTENSIONS'] = ['png', 'jpg', 'jpeg', 'gif']
+db = SQLAlchemy(app)
 #app = Flask(__name__,static_url_path='',root_path='/static')
 #manager = Manager(app=app)
 
@@ -393,6 +395,81 @@ def multi_upload():
         session['filenames'] = filenames
         return redirect(url_for('show_images'))
     return render_template('upload.html', form=form)
+
+@app.route('/ckeditor',methods=['GET','POST'])
+def ckeditor():
+    form = RichTextForm()
+    #if form.submit():
+    if form.submit.data:
+        title = form.title.data
+        body = form.body.data
+        print(title)
+        print(body)
+        return render_template('post.html', title=title, body=body)
+    return render_template('ckeditor.html', form=form)
+
+@app.route('/two-submits',methods=['GET', 'POST'])
+def two_submits():
+    form = NewPostForm()
+    print(form.validate_on_submit())
+    if form.validate_on_submit():
+        if form.save.data:
+            flash('You click the Save button!')
+            print('You click the Save button!')
+        elif form.publish.data:
+            flash('You click the Publish button!')
+            print('You click the Publish button!')
+        return redirect(url_for('index'))
+    return render_template('2submit.html',form=form)
+
+@app.route('/multi-form',methods=['GET','POST'])
+def multi_form():
+    signin_form = SigninForm()
+    register_form = RegisterForm()
+    if signin_form.submit1.data and signin_form.validate():
+        username = signin_form.username.data
+        flash('%s,You just submit signin_form!'% username)
+        print('%s,You just submit signin_form!'% username)
+        return redirect(url_for('index'))
+    elif register_form.submit2.data and register_form.validate():
+        username = register_form.username.data
+        flash('%s,You just submit register_form!'% username)
+        print('%s,You just submit register_form!'% username)
+        return redirect(url_for('index'))
+    return render_template('2form.html', signin_form=signin_form, register_form=register_form)
+
+@app.route('/multi-form-multi-view',methods=['GET','POST'])
+def multi_form_multi_view():
+    signin_form = SigninForm()
+    register_form = RegisterForm()
+    return render_template('2form2view.html',signin_form=signin_form,register_form=register_form)
+@app.route('/handle-signin',methods=['POST'])
+def handle_signin():
+    signin_form = SigninForm()
+    register_form = RegisterForm()
+    if signin_form.validate() and signin_form.submit1.data:
+        username = signin_form.username.data
+        flash('%s,You just submit signin_form!'% username)
+        print('%s,You just submit signin_form!'% username)
+        return redirect(url_for('index'))
+    return render_template('2form2view.html', signin_form=signin_form, register_form=register_form)
+
+@app.route('/handle-register',methods=['POST'])
+def handle_register():
+    signin_form = SigninForm()
+    register_form = RegisterForm()
+    if register_form.submit2.data and register_form.validate():
+        username = register_form.username.data
+        flash('%s,You just submit register_form!'% username)
+        print('%s,You just submit register_form!'% username)
+        return redirect(url_for('index'))
+    return render_template('2form2view.html', signin_form=signin_form, register_form=register_form)
+
+class Note(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    body = db.Column(db.Text)
+
+
 
 
 if __name__ == '__main__':

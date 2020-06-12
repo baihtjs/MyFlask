@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+{% from '_macro.html' import form_field %}
+<head>
+    <meta charset="UTF-8">
+    <title>2Submit</title>
+</head>
+<h1>2Submits</h1>
+<body>
+<form method="post">
+    {{ form.csrf_token }}
+    {{ form_field(form.title) }}
+    {{ form_field(form.body) }}
+    {{ form.save }}
+    {{ form.publish }}
+</form>
+</body>
+</html>

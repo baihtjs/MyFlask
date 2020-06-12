@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>2Form</title>
+    {% from '_macro.html' import form_field %}
+</head>
+<body>
+<p>Signin-Form</p>
+<form method="post">
+    {{ signin_form.csrf_token }}
+    {{ form_field(signin_form.username) }}
+    {{ form_field(signin_form.passoword) }}
+    {{ signin_form.submit1 }}
+</form>
+<p>Register-Form</p>
+<form method="post">
+    {{ register_form.csrf_token }}
+    {{ form_field(register_form.username) }}
+    {{ form_field(register_form.email) }}
+    {{ form_field(register_form.password) }}
+    {{ register_form.submit2 }}
+</form>
+</body>
+</html>

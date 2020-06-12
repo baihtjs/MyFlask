@@ -1,7 +1,8 @@
+from flask_ckeditor import CKEditorField
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileRequired, FileAllowed
 from wtforms import StringField, PasswordField, BooleanField, SubmitField, DateField, DateTimeField, FileField, \
-    MultipleFileField
+    MultipleFileField, TextAreaField
 from wtforms.validators import DataRequired, Length, Email
 
 
@@ -23,4 +24,27 @@ class UploadForm(FlaskForm):
 class MultiUploadForm(FlaskForm):
     photo = MultipleFileField('Upload Multi Image', validators=[DataRequired()])
     submit = SubmitField()
+
+class RichTextForm(FlaskForm):
+    title = StringField('Title', validators=[DataRequired(), Length(1,50)])
+    body = CKEditorField('Body')
+    #body = CKEditorField('Body', validators=[DataRequired()])
+    submit = SubmitField('Publish')
+class NewPostForm(FlaskForm):
+    title = StringField('Title', validators=[DataRequired(), Length(1,50)])
+    body = TextAreaField('Body', validators=[DataRequired()])
+    save = SubmitField('保存草稿')
+    publish = SubmitField('发布')
+
+class SigninForm(FlaskForm):
+    username = StringField('Username',validators=[DataRequired(), Length(1,10)])
+    passoword = PasswordField('Password',validators=[DataRequired()])
+    submit1 = SubmitField('Signin')
+
+class RegisterForm(FlaskForm):
+    username = StringField('Username',validators=[DataRequired(), Length(1,10)])
+    email = StringField('Email',validators=[DataRequired(), Email()])
+    password = PasswordField('Password', validators=[DataRequired()])
+    submit2 = SubmitField('Register')
+
 

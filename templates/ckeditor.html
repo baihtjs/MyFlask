@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<script src="https://cdn.ckeditor.com/4.14.0/standard/ckeditor.js"></script>
+<head>
+    <meta charset="UTF-8">
+    <title>CKEditor</title>
+    {% from '_macro.html' import form_field %}
+</head>
+<h1>Integrate CKEditor with Flask-CKEditor</h1>
+<body>
+<form method="post">
+    {{ form.csrf_token }}
+    {{ form_field(form.title) }}
+    {{ form_field(form.body) }}
+    {{ form.submit }}
+</form>
+</body>
+</html>
