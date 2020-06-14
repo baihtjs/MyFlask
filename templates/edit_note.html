@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Edit-Note</title>
+    {% from '_macro.html' import form_field %}
+</head>
+<body>
+<h1><a href="{{ url_for('index_note') }}">Index-Note</a></h1>
+<h2>Edit_Note-第{{ note_id }}条</h2>
+<form method="post">
+    {{ form.csrf_token }}
+    {{ form_field(form.body, rows=5, cols=50) }}
+    {{ form.submit }}
+</form>
+
+</body>
+</html>

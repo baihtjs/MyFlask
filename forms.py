@@ -47,4 +47,14 @@ class RegisterForm(FlaskForm):
     password = PasswordField('Password', validators=[DataRequired()])
     submit2 = SubmitField('Register')
 
+class NewNoteForm(FlaskForm):
+    body = TextAreaField('Body', validators=[DataRequired()])
+    submit = SubmitField('Save')
+
+class EditNoteForm(NewNoteForm):
+    submit = SubmitField('Update')
+
+class DeleteNoteForm(FlaskForm):
+    submit = SubmitField('Delete')
+
 

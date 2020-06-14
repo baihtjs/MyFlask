@@ -12,7 +12,8 @@ from flask import Markup
 from wtforms import ValidationError
 from flask_sqlalchemy import SQLAlchemy
 
-from forms import LoginForm, UploadForm, MultiUploadForm, RichTextForm, NewPostForm, SigninForm, RegisterForm
+from forms import LoginForm, UploadForm, MultiUploadForm, RichTextForm, NewPostForm, SigninForm, RegisterForm, \
+    NewNoteForm, EditNoteForm, DeleteNoteForm
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = '\xca\x0c\x86\x04\x98@\x02b\x1b7\x8c\x88]\x1b\xd7"+\xe6px@\xc3#\\'
@@ -20,6 +21,8 @@ app.config['MAX_CONTENT_LENGTH']=2*1024*1024
 app.config['UPLOAD_PATH'] = os.path.join(app.root_path, 'uploads')
 app.config['ALLOWED_EXTENSIONS'] = ['png', 'jpg', 'jpeg', 'gif']
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL','sqlite:////' + os.path.join(app.root_path, 'data.db'))
+#app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL','sqlite:///' + os.path.join(app.root_path, 'data.db'))
+
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 #app = Flask(__name__,static_url_path='',root_path='/static')
@@ -470,10 +473,93 @@ def handle_register():
 class Note(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     body = db.Column(db.Text)
+    title = db.Column(db.Text)
+    def __repr__(self):
+        return 'Note %r' % self.body + '%r' % self.title
+@app.route('/index-note')
+def index_note():
+    form = DeleteNoteForm()
+    note = Note.query.all()
+    return render_template('index_note.html',note=note,form=form)
+
+@app.route('/new-note',methods=['GET','POST'])
+def new_note():
+    form = NewNoteForm()
+    if form.validate_on_submit():
+        body = form.body.data
+        note = Note(body=body)
+        db.session.add(note)
+        db.session.commit()
+        flash('New note save success! ')
+        return redirect(url_for('index_note'))
+    return render_template('new_note.html',form=form)
+@app.route('/edit-note/<int:note_id>',methods=['GET','POST'])
+def edit_note(note_id):
+    form = EditNoteForm()
+    note = Note.query.get(note_id)
+    if form.validate_on_submit():
+        note.body = form.body.data
+        db.session.commit()
+        flash('You have edited note successfully!')
+        return redirect(url_for('index_note'))
+    form.body.data = note.body
+    return render_template('edit_note.html',form=form,note=note,note_id=note_id)
+@app.route('/delete-note/<int:note_id>',methods=['GET','POST'])
+def delete_note(note_id):
+    note = Note.query.get(note_id)
+    db.session.delete(note)
+    db.session.commit()
+    flash('You already delete the note!')
+    return redirect(url_for('index_note'))
+@app.route('/delete-note-form/<int:note_id>',methods=['POST'])
+def delete_note_form(note_id):
+    form = DeleteNoteForm()
+    if form.validate_on_submit():
+        note = Note.query.get(note_id)
+        db.session.delete(note)
+        db.session.commit()
+        flash('You already delete the note use form!')
+    else:
+        abort(400)
+    return redirect(url_for('index_note'))
+
+class Author(db.Model):
+    id = db.Column(db.Integer,primary_key=True)
+    name = db.Column(db.String(70), unique=True)
+    phone = db.Column(db.String(20))
+    articles = db.relationship('Article')
+    def __repr__(self):
+        return 'Author %r'% self.name
+
+class Article(db.Model):
+    id = db.Column(db.Integer,primary_key=True)
+    title = db.Column(db.String(50),index=True)
+    body = db.Column(db.Text)
+    author_id = db.Column(db.Integer,db.ForeignKey('author.id'))
+    def __repr__(self):
+        return 'Articles %r'% self.title + '%r'%self.body
+
+class Writer(db.Model):
+    __tablename__ = "writer"
+    id =  db.Column(db.Integer,primary_key=True)
+    name = db.Column(db.String,unique=True)
+    book = db.relationship('Book', back_populates='writer')
+    def __repr__(self):
+        return 'Writer %r'% self.name
+
+class Book(db.Model):
+    __tablename__ = "book"
+    id = db.Column(db.Integer,primary_key=True)
+    title = db.Column(db.String(50),index=True)
+    writer_id = db.Column(db.Integer,db.ForeignKey('writer.id'))
+    writer = db.relationship('Writer', back_populates='book')
+    def __repr__(self):
+        return 'Book %r'% self.title
 
 
-
-
+@app.shell_context_processor
+def make_shell_context():
+    return dict(db=db, Note=Note, Author=Author, Article=Article, Writer=Writer, Book=Book)
 
 if __name__ == '__main__':
    app.run(debug=True, port=8000, host='0.0.0.0')
