@@ -20,8 +20,8 @@ app.config['SECRET_KEY'] = '\xca\x0c\x86\x04\x98@\x02b\x1b7\x8c\x88]\x1b\xd7"+\x
 app.config['MAX_CONTENT_LENGTH']=2*1024*1024
 app.config['UPLOAD_PATH'] = os.path.join(app.root_path, 'uploads')
 app.config['ALLOWED_EXTENSIONS'] = ['png', 'jpg', 'jpeg', 'gif']
-app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL','sqlite:////' + os.path.join(app.root_path, 'data.db'))
-#app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL','sqlite:///' + os.path.join(app.root_path, 'data.db'))
+#app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL','sqlite:////' + os.path.join(app.root_path, 'data.db'))
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL','sqlite:///' + os.path.join(app.root_path, 'data.db'))
 
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
@@ -555,6 +555,14 @@ class Book(db.Model):
     writer = db.relationship('Writer', back_populates='book')
     def __repr__(self):
         return 'Book %r'% self.title
+
+class Singer(db.Model):
+    __tablename__ = "singer"
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(50),unique=True)
+
+class Song(db.Model):
+
 
 
 @app.shell_context_processor
