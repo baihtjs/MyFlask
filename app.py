@@ -560,8 +560,14 @@ class Singer(db.Model):
     __tablename__ = "singer"
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50),unique=True)
+    songs = db.relationship('Song',bac)
 
 class Song(db.Model):
+    __tablename__ = "song"
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String, unique=True)
+    sings = db.relationship('Singer',db.ForeignKey('singer.id'))
+
 
 
 
