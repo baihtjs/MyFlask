@@ -4,6 +4,7 @@ import uuid
 import paramiko
 from flask import Flask, render_template, request, make_response, Response, redirect, url_for, abort, json, session, \
     flash, send_from_directory
+from flask_migrate import Migrate
 from flask_script import Manager
 from flask_wtf.csrf import validate_csrf
 from jinja2.utils import generate_lorem_ipsum
@@ -25,6 +26,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL','sqlite:///' + 
 
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
+migrate = Migrate(app, db)
 #app = Flask(__name__,static_url_path='',root_path='/static')
 #manager = Manager(app=app)
 
@@ -474,6 +476,7 @@ class Note(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     body = db.Column(db.Text)
     title = db.Column(db.Text)
+    timestamp = db.Column(db.TIMESTAMP)
     def __repr__(self):
         return 'Note %r' % self.body + '%r' % self.title
 @app.route('/index-note')
@@ -560,13 +563,41 @@ class Singer(db.Model):
     __tablename__ = "singer"
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50),unique=True)
-    songs = db.relationship('Song',bac)
+    songs = db.relationship('Song',backref='singer')
+    def __repr__(self):
+        return 'Singer %r'% self.name
 
 class Song(db.Model):
     __tablename__ = "song"
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String, unique=True)
-    sings = db.relationship('Singer',db.ForeignKey('singer.id'))
+    singer_id = db.Column(db.Integer,db.ForeignKey('singer.id'))
+    def __repr__(self):
+        return 'Song %r'% self.name
+
+
+association_table=db.Table('association',
+                           db.Column('student_id', db.Integer, db.ForeignKey('student.id')),
+                           db.Column('teacher_id', db.Integer, db.ForeignKey('teacher.id'))
+                            )
+
+class Student(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(50), unique=True)
+    grade = db.Column(db.String(10))
+    teachers = db.relationship('Teacher', secondary=association_table, back_populates='students')
+    def __repr__(self):
+        return 'Student %r'% self.name
+
+class Teacher(db.Model):
+    id = db.Column(db.Integer,primary_key=True)
+    name = db.Column(db.String(50),unique=True)
+    office = db.Column(db.String(10))
+    students = db.relationship('Student', secondary=association_table, back_populates='teachers')
+    def __repr__(self):
+        return 'Teacher %r'% self.name
+
+
 
 
 
