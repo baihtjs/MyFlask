@@ -57,4 +57,9 @@ class EditNoteForm(NewNoteForm):
 class DeleteNoteForm(FlaskForm):
     submit = SubmitField('Delete')
 
+class SubscribeForm(FlaskForm):
+    name = StringField('Name', validators=[DataRequired()])
+    email = StringField('Email', validators=[DataRequired(), Email()])
+    submit = SubmitField('订阅')
+
 

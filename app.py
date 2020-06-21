@@ -4,6 +4,7 @@ import uuid
 import paramiko
 from flask import Flask, render_template, request, make_response, Response, redirect, url_for, abort, json, session, \
     flash, send_from_directory
+from flask_mail import Mail, Message
 from flask_migrate import Migrate
 from flask_script import Manager
 from flask_wtf.csrf import validate_csrf
@@ -14,19 +15,30 @@ from wtforms import ValidationError
 from flask_sqlalchemy import SQLAlchemy
 
 from forms import LoginForm, UploadForm, MultiUploadForm, RichTextForm, NewPostForm, SigninForm, RegisterForm, \
-    NewNoteForm, EditNoteForm, DeleteNoteForm
-
+    NewNoteForm, EditNoteForm, DeleteNoteForm, SubscribeForm
+#encoding=utf-8
 app = Flask(__name__)
 app.config['SECRET_KEY'] = '\xca\x0c\x86\x04\x98@\x02b\x1b7\x8c\x88]\x1b\xd7"+\xe6px@\xc3#\\'
 app.config['MAX_CONTENT_LENGTH']=2*1024*1024
 app.config['UPLOAD_PATH'] = os.path.join(app.root_path, 'uploads')
 app.config['ALLOWED_EXTENSIONS'] = ['png', 'jpg', 'jpeg', 'gif']
-#app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL','sqlite:////' + os.path.join(app.root_path, 'data.db'))
-app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL','sqlite:///' + os.path.join(app.root_path, 'data.db'))
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL','sqlite:////' + os.path.join(app.root_path, 'data.db'))
+#app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL','sqlite:///' + os.path.join(app.root_path, 'data.db'))
 
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config.update(
+    MAIL_SERVER = os.getenv('MAIL_SERVER'),
+    MAIL_PORT = 587,
+    MAIL_USE_TLS = True,
+    MAIL_USERNAME = os.getenv('MAIL_USERNAME'),
+    MAIL_PASSWORD = os.getenv('MAIL_PASSWORD'),
+    MAIL_DEFAULT_SENDER = ('Chalie Chan', os.getenv('MAIL_USERNAME'))
+)
+#iyezprqgfvymbfbh  MAIL_PASSWORD='gotcercedknvbfbh'
+
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
+mail = Mail(app)
 #app = Flask(__name__,static_url_path='',root_path='/static')
 #manager = Manager(app=app)
 
@@ -596,6 +608,52 @@ class Teacher(db.Model):
     students = db.relationship('Student', secondary=association_table, back_populates='teachers')
     def __repr__(self):
         return 'Teacher %r'% self.name
+
+class Post(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(50), unique=True)
+    body = db.Column(db.Text)
+    comments = db.relationship('Comment', cascade='save-update, merge, delete',back_populates='post')
+    def __repr__(self):
+        return 'Post %r'% self.title
+
+class Comment(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    body = db.Column(db.Text)
+    post_id = db.Column(db.Integer,db.ForeignKey('post.id'))
+    post = db.relationship('Post',back_populates='comments')
+    def __repr__(self):
+        return 'Comment %r'% self.body
+
+class Draft(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    body = db.Column(db.Text)
+    edit_time = db.Column(db.Integer, default=0)
+
+@db.event.listens_for(Draft.body, 'set')
+def incresement_edit_time(target, value, oldvalue, initiator):
+        if target.edit_time is not None:
+            target.edit_time += 1
+
+def send_mail(subjiect, to, body):
+    message = Message(subjiect, recipients=[to], body=body, html='')
+    mail.send(message)
+def send_subscribe_mail(subject, to, **kwargs):
+    #message = Message(subject, recipients=[to], sender='Flask Weely <%s>' % os.getenv('USENAME_MAIL'))
+    message = Message(subject, recipients=[to])
+    message.html = render_template('subscribed.html', **kwargs)
+    mail.send(message)
+
+@app.route('/subscribe',methods=['GET','POST'])
+def subscribe():
+    form = SubscribeForm()
+    if form.validate_on_submit():
+        email = form.email.data
+        name = form.name.data
+        send_subscribe_mail('hello subscribe', email, name=name)
+        flash('Send the subscribe email!')
+        return redirect(url_for('index'))
+    return render_template('subscribe.html',form=form)
 
 
 
